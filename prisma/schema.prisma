@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  name         String
+  email        String        @unique
+  phone        String?
+  bloodGroup   String?
+  createdAt    DateTime      @default(now())
+  password     String
+  role         String        @default("user")
+  profile      Profile?
+  projects     Project[]
+  bloodRequests BloodRequest[]
+  appointments  Appointment[]
+}
+
+model Project {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  userId    Int
+  title     String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Profile {
+  id     Int    @id @default(autoincrement())
+  bio    String
+  userId Int    @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BloodRequest {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  bloodGroup String
+  quantity   Int
+  urgency      String   @default("Normal")
+  note         String?
+  status       String   @default("Pending")
+  donorId      Int?
+  donorName    String?
+  donorPhone   String?
+  latitude     Float?
+  longitude    Float?
+  locationName String?
+  createdAt    DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Appointment {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  date      String
+  time      String
+  location  String
+  status    String   @default("Scheduled")
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Campaign {
+  id        Int      @id @default(autoincrement())
+  title     String
+  date      String
+  location  String
+  latitude  Float?
+  longitude Float?
+  organizer String
+  createdAt DateTime @default(now())
+}
+
+model BloodBank {
+  id              Int      @id @default(autoincrement())
+  name            String
+  location        String
+  latitude        Float?
+  longitude       Float?
+  contact         String
+  availableGroups String?
+  createdAt       DateTime @default(now())
+}
+
+model Donor {
+  id               Int      @id @default(autoincrement())
+  name             String
+  bloodGroup       String
+  phone            String
+  city             String
+  lastDonationDate String?
+  createdAt        DateTime @default(now())
+}
+
+model BloodInventory {
+  id         Int    @id @default(autoincrement())
+  bloodGroup String @unique
+  stock      Int    @default(0)
+  total      Int    @default(100)
+}
+
+model Activity {
+  id        Int      @id @default(autoincrement())
+  type      String   // DONATION, REQUEST, REGISTRATION, FULFILLMENT
+  title     String
+  desc      String
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  type      String   // REGISTRATION, EMERGENCY, LOW_STOCK
+  title     String
+  desc      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
